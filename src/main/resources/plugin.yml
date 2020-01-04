@@ -1,0 +1,7 @@
+main: xyz.tomszir.urpg.uRPG
+name: uRPG
+version: 1.0.0
+author: RT1O
+commands:
+  urpg:
+    description: The main command namespace for all uRPG related commands.
