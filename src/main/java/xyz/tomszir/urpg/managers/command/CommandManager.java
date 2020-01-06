@@ -4,13 +4,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.reflections.Reflections;
-import xyz.tomszir.urpg.uRPG;
 import xyz.tomszir.urpg.util.ColorUtil;
 import xyz.tomszir.urpg.util.MessageUtil;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Set;
 
 public class CommandManager implements CommandExecutor {
 
@@ -19,7 +17,7 @@ public class CommandManager implements CommandExecutor {
     public CommandManager() {
         this.commands = new HashMap<String, Command>();
 
-        registerAllCommands();
+        registerCommands();
     }
 
     public void addCommand(Command command) {
@@ -66,21 +64,15 @@ public class CommandManager implements CommandExecutor {
     }
 
     // Adds every Command class to the CommandManager from the "xyz.tomszir.urpg.commands" package;
-    public void registerAllCommands() {
-        Reflections reflections = new Reflections("xyz.tomszir.urpg.commands");
-        Set<Class<? extends Command>> classes = reflections.getSubTypesOf(Command.class);
+    @SuppressWarnings("ALL")
+    public void registerCommands() {
+        Reflections commands = new Reflections("xyz.tomszir.urpg.commands");
 
-        // Add all found commands to the command manager;
-        for (Class<? extends Command> cls : classes) {
-            try {
-                Command command = cls.newInstance();
-
-                uRPG.getInstance().debug("Loaded command - " + command.getLabel());
-
-                addCommand(command);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            for (Class<? extends Command> cls : commands.getSubTypesOf(Command.class))
+                addCommand(cls.newInstance());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

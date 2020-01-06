@@ -10,13 +10,28 @@ public class MenuItem {
 
     private String name;
     private Material material;
+    private ItemStack stack;
+
+    public MenuItem(ItemStack stack) {
+        this.stack = stack;
+    }
 
     public MenuItem(String name, Material material) {
         this.name = name;
         this.material = material;
     }
 
+    public void setBaseItemStack(ItemStack stack) {
+        this.stack = stack;
+    }
+
+    public ItemStack getBaseItemStack() {
+        return stack;
+    }
+
     public ItemStack getItemStack(Player player) {
+        if (this.stack != null) return this.stack;
+
         ItemStack stack = new ItemStack(material, 1);
         ItemMeta meta = stack.getItemMeta();
 

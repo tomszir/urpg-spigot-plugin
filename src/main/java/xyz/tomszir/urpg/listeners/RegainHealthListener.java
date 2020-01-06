@@ -4,25 +4,21 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
-import xyz.tomszir.urpg.managers.player.PlayerFile;
+import xyz.tomszir.urpg.managers.player.uRPGPlayer;
 import xyz.tomszir.urpg.uRPG;
 
 public class RegainHealthListener implements Listener {
     @EventHandler
     public void onRegainHealthEvent(EntityRegainHealthEvent event) {
         if (event.getEntity() instanceof Player) {
-            Player player = (Player) event.getEntity();
-            PlayerFile file = uRPG.getInstance().getPlayerManager().getPlayerFile(player.getUniqueId());
+            // Proportionally scale the regained health to the players current maximum health;
+            uRPGPlayer player = uRPG.getInstance().getPlayerManager().getPlayer(event.getEntity().getUniqueId());
 
-            double health = file.getHealth();
-            double maxHealth = file.getMaxHealth();
+            double health = player.getStats().getCurrentHealth();
+            double maxHealth = player.getStats().getMaxHealth();
+            double regainedHealth = maxHealth * (event.getAmount() / 20.0);
 
-            health += maxHealth * (event.getAmount() / 20.0);
-            health = Math.min(health, maxHealth);
-
-            player.setHealth(health / 20.0);
-            file.setHealth(health);
-            file.save();
+            player.setHealth(Math.min(health + regainedHealth, maxHealth));
         }
     }
 }

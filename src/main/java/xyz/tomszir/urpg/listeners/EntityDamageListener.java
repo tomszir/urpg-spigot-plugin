@@ -1,12 +1,10 @@
 package xyz.tomszir.urpg.listeners;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
-import xyz.tomszir.urpg.managers.player.PlayerFile;
+import xyz.tomszir.urpg.managers.player.uRPGPlayer;
 import xyz.tomszir.urpg.uRPG;
 import xyz.tomszir.urpg.util.FormulaUtil;
 
@@ -14,35 +12,41 @@ public class EntityDamageListener implements Listener {
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Player) {
-            Player player = (Player) event.getEntity();
-            PlayerFile file = uRPG.getInstance().getPlayerManager().getPlayerFile(player.getUniqueId());
+            event.setCancelled(true);
 
-            double defense = file.getDefense();
-            double health = file.getHealth();
-            double maxHealth = file.getMaxHealth();
+            // Uses the NEW health instead of the old one.
+            Player eventPlayer = (Player) event.getEntity();
+            uRPGPlayer harmedPlayer = uRPG.getInstance().getPlayerManager().getPlayer(eventPlayer.getUniqueId());
 
-            double damage = event.getDamage();
-            double finalDamage = damage * FormulaUtil.getDamageReductionFromDefense(defense);
+            double defense = harmedPlayer.getStats().getDefense();
+            double health = harmedPlayer.getStats().getCurrentHealth();
 
-            health = health - finalDamage;
+            double eventDamage = event.getDamage();
+            double resultingDamage = Math.round(eventDamage * FormulaUtil.getDamageReductionFromDefense(defense) * 100) / 100.0;
 
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(Math.ceil(health) + " / " + maxHealth + " HP"));
+            uRPG.getInstance().debug("" + event.getCause());
 
-            if (health > 0) {
-                if (health < maxHealth) {
-                    player.setHealth(20 * (health / maxHealth));
-                    player.setNoDamageTicks(20);
+            // Limit damage rate on Lava & Cactus;
+            // TODO: Test more edge cases and add them.
+            if (event.getCause() == EntityDamageEvent.DamageCause.LAVA
+                || event.getCause() == EntityDamageEvent.DamageCause.FIRE
+                || event.getCause() == EntityDamageEvent.DamageCause.CONTACT) {
+                if (event.getCause() == EntityDamageEvent.DamageCause.LAVA
+                    || event.getCause() == EntityDamageEvent.DamageCause.FIRE)
+                    eventPlayer.setLastDamage(eventPlayer.getLastDamage() + 0.05);
+                if (event.getCause() == EntityDamageEvent.DamageCause.CONTACT)
+                    eventPlayer.setLastDamage(eventPlayer.getLastDamage() + 0.1);
 
-                    event.setCancelled(true);
-                } else {
-                    event.setDamage(0);
-                }
+                if (eventPlayer.getLastDamage() < 1)
+                    return;
 
-                file.setHealth(health);
-                file.save();
-            } else {
-                player.setHealth(0);
+                uRPG.getInstance().debug("Last:"  +eventPlayer.getLastDamage());
+
+                if (eventPlayer.getLastDamage() > 1)
+                    eventPlayer.setLastDamage(0);
             }
+
+            harmedPlayer.damage(resultingDamage);
         }
     }
 }

@@ -11,7 +11,5 @@ public class PlayerJoinListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         uRPG.getInstance().getPlayerManager().loadPlayerFile(player.getUniqueId());
-
-        player.sendMessage("Nigga");
     }
 }

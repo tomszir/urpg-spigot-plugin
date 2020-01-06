@@ -27,14 +27,16 @@ public class PlayerFile implements FileInterface {
     public static final String[] MAX_HEALTH_EXP_KEYS = null;
     public static final String MAX_HEALTH_KEY = "stats.health.maximum";
 
+    private uRPG plugin = uRPG.getInstance();
+
+    private UUID uuid;
     private File file;
     private FileConfiguration data;
 
-    private double health;
-
     public PlayerFile(UUID uuid) {
         // Path to PlayerFile "/plugins/uRPG/players/<uuid>.yml";
-        this.file = new File(uRPG.getInstance().getDataFolder() + File.separator + "players", uuid + ".yml");
+        this.uuid = uuid;
+        this.file = new File(plugin.getDataFolder() + File.separator + "players", uuid + ".yml");
         this.data = new YamlConfiguration();
 
         if (!file.exists()) {
@@ -50,7 +52,8 @@ public class PlayerFile implements FileInterface {
     }
 
     public int getLevel() {
-        return data.getInt(LEVEL_KEY, 1);
+        return data.getInt(LEVEL_KEY,
+            plugin.getConfig().getInt("player-defaults.level", 1));
     }
 
     public void setLevel(int level) {
@@ -58,14 +61,15 @@ public class PlayerFile implements FileInterface {
     }
 
     public int getExperience() {
-        return data.getInt(EXP_KEY, 0);
+        return data.getInt(EXP_KEY,
+            plugin.getConfig().getInt("player-defaults.experience", 0));
     }
 
     public void setExperience(int experience) {
         data.set(EXP_KEY, experience);
     }
 
-    public void setDefense(int defense) {
+    public void setDefense(double defense) {
         data.set(DEFENSE_KEY, defense);
     }
 
@@ -73,12 +77,16 @@ public class PlayerFile implements FileInterface {
         return data.getDouble(DEFENSE_KEY, 0);
     }
 
-    public void setHealth(double health) {
-        this.health = health;
+    public double getCurrentHealth() {
+        return plugin.getPlayerManager().getPlayerHealth(uuid);
     }
 
-    public double getHealth() {
-        return health;
+    public void setCurrentHealth(double health) {
+        plugin.getPlayerManager().setPlayerHealth(uuid, health);
+    }
+
+    public double getLastSavedCurrentHealth() {
+        return data.getDouble(CURR_HEALTH_KEY, BASE_MAX_HEALTH);
     }
 
     public void setMaxHealth(double maxHealth) {
@@ -86,16 +94,27 @@ public class PlayerFile implements FileInterface {
     }
 
     public double getMaxHealth() {
-        return data.getDouble(MAX_HEALTH_KEY, BASE_MAX_HEALTH);
+        return data.getDouble(MAX_HEALTH_KEY,
+            plugin.getConfig().getDouble("player-defaults.max-health", BASE_MAX_HEALTH));
+    }
+
+    public UUID getUniqueId() {
+        return uuid;
     }
 
     @Override
     public void save() {
+        // -- Leveling;
         setLevel(getLevel());
         setExperience(getExperience());
 
-        // Health gets changed a lot, so store it in memory and only save it when leaving or something;
-        data.set(CURR_HEALTH_KEY, health);
+        // -- Health;
+        setMaxHealth(getMaxHealth());
+
+        // -- Stats;
+        setDefense(getDefense());
+
+        data.set(CURR_HEALTH_KEY, getCurrentHealth());
 
         try {
             data.save(file);
@@ -111,8 +130,6 @@ public class PlayerFile implements FileInterface {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        health = data.getDouble(CURR_HEALTH_KEY, getMaxHealth());
     }
 
     public void migrate() {
