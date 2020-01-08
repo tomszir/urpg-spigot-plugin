@@ -52,6 +52,10 @@ public class BaseItem {
         return rarity;
     }
 
+    public Material getMaterial() {
+        return material;
+    }
+
     public ItemStack getItemStack() {
         return getItemStack(1);
     }

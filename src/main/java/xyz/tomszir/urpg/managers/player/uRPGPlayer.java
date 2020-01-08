@@ -5,6 +5,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import xyz.tomszir.urpg.items.BaseItem;
@@ -132,6 +133,11 @@ public class uRPGPlayer {
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR,
                     TextComponent.fromLegacyText(ColorUtil.formatColor(message)));
         }
+    }
+
+    public void updateArmorBar() {
+        plugin.debug("ARMOR_BAR: " + 20.0 + " * " + (1 - getDamageReduction()));
+        player.getAttribute(Attribute.GENERIC_ARMOR).setBaseValue(20.0 * (1 - getDamageReduction()));
     }
 
     public EquippableItem getEquipped(ItemStack equipped) {

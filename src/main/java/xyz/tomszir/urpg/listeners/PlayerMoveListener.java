@@ -11,15 +11,16 @@ import xyz.tomszir.urpg.uRPG;
 import java.util.List;
 
 public class PlayerMoveListener implements Listener {
+
+    private uRPG plugin = uRPG.getInstance();
+
     @EventHandler
-    @SuppressWarnings("ALL")
     public void onPlayerMove(PlayerMoveEvent event) {
         Player eventPlayer = event.getPlayer();
-        uRPGPlayer player = uRPG.getInstance().getPlayerManager().getPlayer(eventPlayer.getUniqueId());
+        uRPGPlayer player = plugin.getPlayerManager().getPlayer(eventPlayer.getUniqueId());
 
         List<EquippableItem> equipped = player.getEquippedList();
 
-        // Run the event for every equipped item;
         for (EquippableItem item : equipped)
             if (item != null)
                 item.onPlayerMove(event, player);

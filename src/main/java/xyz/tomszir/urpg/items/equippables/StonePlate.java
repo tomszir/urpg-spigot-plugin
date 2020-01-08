@@ -16,7 +16,7 @@ public class StonePlate extends EquippableItem {
 
         setDefense(250);
 
-        addEffect("Like a Stone", "Increases your defense &a50%&7, but slows your movement speed by &c20%&7.");
+        addEffect("Stone-Like", "Increases your defense by &a50%&7, but slows your movement speed by &c20%&7 &8(Slowness I)&7.");
     }
 
     @Override

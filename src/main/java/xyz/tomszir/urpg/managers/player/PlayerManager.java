@@ -20,15 +20,13 @@ public class PlayerManager {
 
         loadOnlinePlayerFiles();
 
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(uRPG.getInstance(), new Runnable() {
-            @Override
-            public void run() {
-                for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
-                    uRPGPlayer player = getPlayer(onlinePlayer.getUniqueId());
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(uRPG.getInstance(), () ->  {
+            for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
+                uRPGPlayer player = getPlayer(onlinePlayer.getUniqueId());
 
-                    player.updateVanillaHealth();
-                    player.showCurrentHealth();
-                }
+                player.updateVanillaHealth();
+                player.showCurrentHealth();
+                player.updateArmorBar();
             }
         }, 0L, PLAYER_UPDATE_INTERVAL);
     }

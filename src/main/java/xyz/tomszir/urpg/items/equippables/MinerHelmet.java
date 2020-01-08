@@ -22,50 +22,49 @@ public class MinerHelmet extends EquippableItem {
         super("MINER_HELMET", Material.IRON_HELMET);
 
         setName("Miner's Helmet");
-        addEffect("Miner's Will", "&7Provides a permanent light source around you &8(Light Level: 20) &7also grants you a permanent &6Haste IV &7buff.");
-        setRarity(ItemRarity.EPIC);
+        addEffect("Torch", "&7Provides a permanent light source around you &8(Light Level: 20)&7.\n\n&6Set Bonus: &cNot Active\n&8Grants you permanent Haste IV.");
+        setRarity(ItemRarity.UNCOMMON);
 
         setDefense(50);
-        // setPercentDefense(0.3); // 30%
-
-        // setHealth(100);
-        // setPercentHealth(0.5);
     }
 
     @Override
     public void onEquip(uRPGPlayer player) {
-        player.getBukkitPlayer().sendMessage("Equipped!");
+        onPassiveEffect(player);
     }
 
     @Override
     public void onUnequip(uRPGPlayer player) {
-        player.getBukkitPlayer().sendMessage("Unequipped!");
+        Location location = player.getBukkitPlayer().getLocation();
+
+        LightAPI.deleteLight(location, LightType.BLOCK, false);
+
+        for (ChunkInfo info : LightAPI.collectChunks(location, LightType.BLOCK, LIGHT_LEVEL))
+            LightAPI.updateChunk(info, LightType.BLOCK);
+
+        player.getBukkitPlayer().removePotionEffect(PotionEffectType.FAST_DIGGING);
     }
 
     @Override
     public void onPlayerMove(PlayerMoveEvent event, uRPGPlayer player) {
-        // Creates a light radius around the Player;
         Location to = event.getTo();
         Location from = event.getFrom();
 
-        if (to != null)
-            LightAPI.createLight(to, LightType.BLOCK, LIGHT_LEVEL, true);
-
         if (to != from)
-            Bukkit.getScheduler().scheduleSyncDelayedTask(uRPG.getInstance(), new Runnable() {
-                @Override
-                public void run() {
-                    LightAPI.deleteLight(from, LightType.BLOCK, false);
-                }
+            Bukkit.getScheduler().scheduleSyncDelayedTask(uRPG.getInstance(), () -> {
+                LightAPI.deleteLight(from, LightType.BLOCK, false);
             }, 20L);
 
-        for (ChunkInfo info : LightAPI.collectChunks(to, LightType.BLOCK, LIGHT_LEVEL))
-            LightAPI.updateChunk(info, LightType.BLOCK);
+        if (to != null) {
+            LightAPI.createLight(to, LightType.BLOCK, LIGHT_LEVEL, true);
+
+            for (ChunkInfo info : LightAPI.collectChunks(to, LightType.BLOCK, LIGHT_LEVEL))
+                LightAPI.updateChunk(info, LightType.BLOCK);
+        }
     }
 
     @Override
     public void onPassiveEffect(uRPGPlayer player) {
-        // Reset the PotionEffect
         player.getBukkitPlayer().removePotionEffect(PotionEffectType.FAST_DIGGING);
         player.getBukkitPlayer().addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 20 * 5, 3));
     }

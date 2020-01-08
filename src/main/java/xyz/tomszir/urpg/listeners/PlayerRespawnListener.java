@@ -7,6 +7,7 @@ import xyz.tomszir.urpg.managers.player.uRPGPlayer;
 import xyz.tomszir.urpg.uRPG;
 
 public class PlayerRespawnListener implements Listener {
+
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         uRPGPlayer player = uRPG.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());

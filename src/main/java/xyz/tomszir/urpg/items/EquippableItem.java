@@ -1,6 +1,8 @@
 package xyz.tomszir.urpg.items;
 
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -11,8 +13,28 @@ import xyz.tomszir.urpg.uRPG;
 import xyz.tomszir.urpg.util.ColorUtil;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class EquippableItem extends BaseItem {
+
+    // TODO: Set bonuses, auras, onDamage, onHit, modifiers, "growth";
+
+    public static final List<Material> HELMETS = List.of(
+            Material.LEATHER_HELMET, Material.IRON_HELMET, Material.GOLDEN_HELMET, Material.DIAMOND_HELMET, Material.CHAINMAIL_HELMET
+    );
+    public static final List<Material> CHESTPLATES = List.of(
+            Material.LEATHER_CHESTPLATE, Material.IRON_CHESTPLATE, Material.GOLDEN_CHESTPLATE, Material.DIAMOND_CHESTPLATE, Material.CHAINMAIL_CHESTPLATE
+    );
+    public static final List<Material> LEGGINGS = List.of(
+            Material.LEATHER_LEGGINGS, Material.IRON_LEGGINGS, Material.GOLDEN_LEGGINGS, Material.DIAMOND_LEGGINGS, Material.CHAINMAIL_LEGGINGS
+    );
+    public static final List<Material> BOOTS = List.of(
+            Material.LEATHER_BOOTS, Material.IRON_BOOTS, Material.GOLDEN_BOOTS, Material.DIAMOND_BOOTS, Material.CHAINMAIL_BOOTS
+    );
+    public static final List<Material> EQUIPPABLES = Stream.of(HELMETS, CHESTPLATES, LEGGINGS, BOOTS)
+        .flatMap(Collection::stream)
+        .collect(Collectors.toList());
 
     private double defense = 0;
     private double health = 0;
@@ -57,6 +79,10 @@ public class EquippableItem extends BaseItem {
         return health;
     }
 
+    public boolean canBeEquipped(int slot) {
+        return slot == EquippableItem.getEquipSlot(getMaterial());
+    }
+
     public ItemStack getItemStack(int amount) {
         ItemStack stack = super.getItemStack(amount);
         ItemMeta meta = stack.getItemMeta();
@@ -75,7 +101,7 @@ public class EquippableItem extends BaseItem {
                 String name = effect.getKey();
                 Object description = effect.getValue();
 
-                lore.add(ColorUtil.formatColor("&6Effect: " + name));
+                lore.add(ColorUtil.formatColor("&6Effect: &e" + name));
                 lore.addAll(Arrays.asList(ChatPaginator.wordWrap(ColorUtil.formatColor("&7" + description), 36)));
                 lore.add("");
             }
@@ -85,6 +111,9 @@ public class EquippableItem extends BaseItem {
 
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        // This is here just so the custom armor bar can work;
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS,
+            new AttributeModifier("generic.toughness", -100.0, AttributeModifier.Operation.ADD_NUMBER));
         stack.setItemMeta(meta);
 
         return stack;
@@ -124,5 +153,21 @@ public class EquippableItem extends BaseItem {
 
     public void onPassiveEffect(uRPGPlayer player) {
         // This runs every 5 seconds
+    }
+
+    public void onRapidPassiveEffect(uRPGPlayer player) {
+        // This runs every second
+    }
+
+    public static int getEquipSlot(Material material) {
+        if (HELMETS.contains(material))
+            return 39;
+        if (CHESTPLATES.contains(material))
+            return 38;
+        if (LEGGINGS.contains(material))
+            return 37;
+        if (BOOTS.contains(material))
+            return 36;
+        return -1;
     }
 }

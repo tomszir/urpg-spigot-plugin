@@ -7,9 +7,12 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import xyz.tomszir.urpg.uRPG;
 
 public class PlayerQuitListener implements Listener {
+
+    private uRPG plugin = uRPG.getInstance();
+
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        uRPG.getInstance().getPlayerManager().removePlayerFile(player.getUniqueId());
+        plugin.getPlayerManager().removePlayerFile(player.getUniqueId());
     }
 }

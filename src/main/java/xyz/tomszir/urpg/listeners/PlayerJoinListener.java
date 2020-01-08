@@ -7,9 +7,12 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import xyz.tomszir.urpg.uRPG;
 
 public class PlayerJoinListener implements Listener {
+
+    private uRPG plugin = uRPG.getInstance();
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        uRPG.getInstance().getPlayerManager().loadPlayerFile(player.getUniqueId());
+        plugin.getPlayerManager().loadPlayerFile(player.getUniqueId());
     }
 }
